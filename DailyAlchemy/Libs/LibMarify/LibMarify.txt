@@ -1,0 +1,15 @@
+
+## Title: LibMarify
+## Author: @Marify
+## APIVersion: 100026
+## Version: 1.0.2
+## AddOnVersion: 102
+## OptionalDependsOn: LibStub
+
+## Libraries:
+../LibStub/LibStub.lua
+
+
+LibMarify.lua
+
+
