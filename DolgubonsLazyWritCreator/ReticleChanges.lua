@@ -19,6 +19,28 @@ function WritCreater.initializeReticleChanges()
 		return false
 	end
 
+	local function parser(str)
+		local seperater = "[-_]+"
+
+		str = string.gsub(str,":"," ")
+
+		local params = {}
+		local i = 1
+		local searchResult1, searchResult2  = string.find(str,seperater)
+		if searchResult1 == 1 then
+			str = string.sub(str, searchResult2+1)
+			searchResult1, searchResult2  = string.find(str,seperater)
+		end
+
+		while searchResult1 do
+			params[i] = string.sub(str, 1, searchResult1-1)
+			str = string.sub(str, searchResult2+1)
+			searchResult1, searchResult2  = string.find(str,seperater)
+			i=i+1
+		end
+		return str
+
+	end
 
 	local function setupReplacement(object, functionName)
 
@@ -27,6 +49,9 @@ function WritCreater.initializeReticleChanges()
 		-- If the setting is off exit
 
 		if not WritCreater:GetSettings().changeReticle then  original(self, text) return end
+			local dispText = text;
+			if WritCreater.lang == "kt" then dispText = parser(text) end
+
 			-- if not a station exit
 			local craftingType = stations[text]
 			if not craftingType then  original(self, text) return end
@@ -37,9 +62,9 @@ function WritCreater.initializeReticleChanges()
 
 				-- we have a writ. Do we need the reticle green or red
 				if isQuestComplete(writs[craftingType]) or GetJournalQuestIsComplete(writs[craftingType]) then
-					text = "|c66ff66"..text.."|r"
+					text = "|c66ff66"..dispText.."|r"
 				else
-					text = "|cff6666"..text.."|r"
+					text = "|cff6666"..dispText.."|r"
 				end
 
 				original(self, text)
