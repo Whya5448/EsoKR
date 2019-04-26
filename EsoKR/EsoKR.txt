@@ -1,6 +1,6 @@
 ﻿## Title: EsoKR
 ## Description: Unofficial Korean Translation
-## Version: 0.8.1
+## Version: 0.8.2
 ## Author: DCinside |c2980b9ESO Minor Gallery|r
 ## APIVersion: 100026
 ## SavedVariables: EsoKR_Variables
