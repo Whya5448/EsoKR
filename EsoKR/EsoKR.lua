@@ -400,7 +400,7 @@ local function onAddonLoaded(eventCode, addOnName)
     end
 
     EVENT_MANAGER:UnregisterForEvent(EsoKR.name, EVENT_ADD_ON_LOADED)
-    showMessageBox("its Title", "Hello!", SI_DIALOG_CONFIRM)
+    --showMessageBox("its Title", "Hello!", SI_DIALOG_CONFIRM)
 end
 
 EVENT_MANAGER:RegisterForEvent(EsoKR.name, EVENT_ADD_ON_LOADED, onAddonLoaded)
