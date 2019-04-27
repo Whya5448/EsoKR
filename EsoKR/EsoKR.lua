@@ -1,10 +1,11 @@
-local EsoKR = {}
+local EsoKR = EsoKR or {}
 EsoKR.name = "EsoKR"
 EsoKR.Flags = { "en", "kr", "kb", "tr" }
 EsoKR.firstInit = true
 EsoKR.chat = { changed = true, privCursorPos = 0, editing = false }
+EsoKR.version = "0.8.2"
 
-local function setLanguage(lang)
+function EsoKR:setLanguage(lang)
     zo_callLater(function()
         SetCVar("language.2", lang)
         EsoKR.savedVars.lang = lang
@@ -12,8 +13,12 @@ local function setLanguage(lang)
     end, 500)
 end
 
-local function getLanguage()
+function EsoKR:getLanguage()
     return GetCVar("language.2")
+end
+
+function EsoKR:getString(id)
+    return con2CNKR(GetString(id))
 end
 
 local function chsize(char)
@@ -43,9 +48,7 @@ local function utf8sub(str, startChar, numChars)
     return str:sub(startIndex, currentIndex - 1)
 end
 
-
-
-local function con2CNKR(text)
+function EsoKR:con2CNKR(text)
     local temp = ""
     local scanleft = 0
     local result = ""
@@ -393,14 +396,21 @@ local function showMessageBox(title, msg, btnText, callback)
     ZO_Dialogs_ShowDialog("EsoKR:MessageBox")
 end
 
+function EsoKR:newInit()
+    showMessageBox(getString(EsoKR_NOTICE_TITLE),getString(EsoKR_NOTICE_BODY),SI_DIALOG_CONFIRM)
+    EsoKR.newVars = ZO_SavedVars:NewAccountWide("EsoKR_vars", 1, "EsoKR", { version = version })
+    d(newVars)
+    d(EsoKR.newVars)
+end
+
 local function onAddonLoaded(eventCode, addOnName)
     init(eventCode, addOnName)
     if(addOnName ~= EsoKR.name) then
         return
     end
 
+    EsoKR:newInit()
     EVENT_MANAGER:UnregisterForEvent(EsoKR.name, EVENT_ADD_ON_LOADED)
-    --showMessageBox("its Title", "Hello!", SI_DIALOG_CONFIRM)
 end
 
 EVENT_MANAGER:RegisterForEvent(EsoKR.name, EVENT_ADD_ON_LOADED, onAddonLoaded)
