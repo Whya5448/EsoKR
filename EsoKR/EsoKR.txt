@@ -16,3 +16,4 @@
 
 EsoKR.lua
 EsoKR.xml
+strings.lua
