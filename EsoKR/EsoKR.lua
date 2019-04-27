@@ -3,7 +3,7 @@ EsoKR.name = "EsoKR"
 EsoKR.Flags = { "en", "kr", "kb", "tr" }
 EsoKR.firstInit = true
 EsoKR.chat = { changed = true, privCursorPos = 0, editing = false }
-EsoKR.version = "0.8.2"
+EsoKR.version = "0.9.0"
 
 function setLanguage(lang)
     zo_callLater(function()
