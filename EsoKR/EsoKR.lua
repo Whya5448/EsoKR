@@ -48,12 +48,15 @@ local function utf8sub(str, startChar, numChars)
     return str:sub(startIndex, currentIndex - 1)
 end
 
-function EsoKR:con2CNKR(text)
+function EsoKR:con2CNKR(texts)
     local temp = ""
     local scanleft = 0
     local result = ""
     local num = 0
     local hashan = false;
+
+    text = texts
+    if(texts == nil) then text = "" end
     for i in string.gmatch(text, ".") do
         --[[if(num >= 39) and hashan then
             temp = ""
@@ -333,39 +336,24 @@ local function init(eventCode, addOnName)
         end
     end
 
-    ZO_PreHook("ZO_ChatTextEntry_Execute", function(control)
-        control.system:CloseTextEntry(true)
-    end)
-
-    ZO_PreHook("ZO_ChatTextEntry_Escape", function(control)
-        control.system:CloseTextEntry(true)
-    end)
-
-    ZO_PreHook("ZO_ChatTextEntry_TextChanged", function(control, newText)
-        if EsoKR.chat.editing then return end
-        local cursorPos = control.system.textEntry:GetCursorPosition()
-        if cursorPos ~= EsoKR.chat.privCursorPos and cursorPos ~= 0 then
-            EsoKR.chat.editing = true
-            local text = EsoKR:con2CNKR(control.system.textEntry:GetText())
-            control.system.textEntry:SetText(text)
-            if(cursorPos < utfstrlen(text)) then
-                control.system.textEntry:SetCursorPosition(cursorPos)
-            end
-            EsoKR.chat.editing = false
-        end
-        EsoKR.chat.privCursorPos = cursorPos
-    end)
-
-    ZO_PreHook(ZO_TradingHouseNameSearchFeature_Keyboard, "OnNameSearchEditTextChanged", function()
-        --d("1234")
-    end)
-    ZO_PreHook("ZO_EditDefaultText_OnTextChanged", function(x)
-        d("5678")
-        d(x)
-        d(x.GetText())
-    end)
+    ZO_PreHook("ZO_ChatTextEntry_Execute", function(control) control.system:CloseTextEntry(true) end)
+    ZO_PreHook("ZO_ChatTextEntry_Escape", function(control) control.system:CloseTextEntry(true) end)
+    ZO_PreHook("ZO_ChatTextEntry_TextChanged", function(control, newText) EsoKR:Convert(control.system.textEntry) end)
+    ZO_PreHook("ZO_EditDefaultText_OnTextChanged", function(edit) EsoKR:Convert(edit) end)
 end
 
+function EsoKR:Convert(edit)
+    if EsoKR.chat.editing then return end
+    local cursorPos = edit:GetCursorPosition()
+    if cursorPos ~= EsoKR.chat.privCursorPos and cursorPos ~= 0 then
+        EsoKR.chat.editing = true
+        local text = EsoKR:con2CNKR(edit:GetText())
+        edit:SetText(text)
+        if(cursorPos < utfstrlen(text)) then edit:SetCursorPosition(cursorPos) end
+        EsoKR.chat.editing = false
+    end
+    EsoKR.chat.privCursorPos = cursorPos
+end
 
 local function loadScreen(event)
     SetSCTKeyboardFont("EsoKR/fonts/univers67.otf|29|soft-shadow-thick")
