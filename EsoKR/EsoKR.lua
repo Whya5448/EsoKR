@@ -5,7 +5,7 @@ EsoKR.firstInit = true
 EsoKR.chat = { changed = true, privCursorPos = 0, editing = false }
 EsoKR.version = "0.8.2"
 
-function EsoKR:setLanguage(lang)
+function setLanguage(lang)
     zo_callLater(function()
         SetCVar("language.2", lang)
         EsoKR.savedVars.lang = lang
@@ -13,12 +13,12 @@ function EsoKR:setLanguage(lang)
     end, 500)
 end
 
-function EsoKR:getLanguage()
+function getLanguage()
     return GetCVar("language.2")
 end
 
 function EsoKR:getString(id)
-    return con2CNKR(GetString(id))
+    return EsoKR:con2CNKR(GetString(id))
 end
 
 local function chsize(char)
@@ -346,8 +346,7 @@ local function init(eventCode, addOnName)
         local cursorPos = control.system.textEntry:GetCursorPosition()
         if cursorPos ~= EsoKR.chat.privCursorPos and cursorPos ~= 0 then
             EsoKR.chat.editing = true
-            local text = control.system.textEntry:GetText()
-            text = con2CNKR(text)
+            local text = EsoKR:con2CNKR(control.system.textEntry:GetText())
             control.system.textEntry:SetText(text)
             if(cursorPos < utfstrlen(text)) then
                 control.system.textEntry:SetCursorPosition(cursorPos)
@@ -356,7 +355,17 @@ local function init(eventCode, addOnName)
         end
         EsoKR.chat.privCursorPos = cursorPos
     end)
+
+    ZO_PreHook(ZO_TradingHouseNameSearchFeature_Keyboard, "OnNameSearchEditTextChanged", function()
+        --d("1234")
+    end)
+    ZO_PreHook("ZO_EditDefaultText_OnTextChanged", function(x)
+        d("5678")
+        d(x)
+        d(x.GetText())
+    end)
 end
+
 
 local function loadScreen(event)
     SetSCTKeyboardFont("EsoKR/fonts/univers67.otf|29|soft-shadow-thick")
@@ -373,11 +382,11 @@ local function loadScreen(event)
 end
 
 
-local function closeMessageBox()
+function EsoKR:closeMessageBox()
     ZO_Dialogs_ReleaseDialog("EsoKR:MessageBox", false)
 end
 
-local function showMessageBox(title, msg, btnText, callback)
+function EsoKR:showMessageBox(title, msg, btnText, callback)
     local confirmDialog =
     {
         title = { text = title },
@@ -392,15 +401,15 @@ local function showMessageBox(title, msg, btnText, callback)
     }
 
     ZO_Dialogs_RegisterCustomDialog("EsoKR:MessageBox", confirmDialog)
-    closeMessageBox()
+    EsoKR:closeMessageBox()
     ZO_Dialogs_ShowDialog("EsoKR:MessageBox")
 end
 
 function EsoKR:newInit()
-    showMessageBox(getString(EsoKR_NOTICE_TITLE),getString(EsoKR_NOTICE_BODY),SI_DIALOG_CONFIRM)
-    EsoKR.newVars = ZO_SavedVars:NewAccountWide("EsoKR_vars", 1, "EsoKR", { version = version })
-    d(newVars)
-    d(EsoKR.newVars)
+    if EsoKR.savedVars.addonVer ~= EsoKR.version then
+        EsoKR:showMessageBox(EsoKR:getString(EsoKR_NOTICE_TITLE),EsoKR:getString(EsoKR_NOTICE_BODY),SI_DIALOG_CONFIRM)
+        EsoKR.savedVars.addonVer = EsoKR.version
+    end
 end
 
 local function onAddonLoaded(eventCode, addOnName)
@@ -410,7 +419,7 @@ local function onAddonLoaded(eventCode, addOnName)
     end
 
     EsoKR:newInit()
-    EVENT_MANAGER:UnregisterForEvent(EsoKR.name, EVENT_ADD_ON_LOADED)
+    --EVENT_MANAGER:UnregisterForEvent(EsoKR.name, EVENT_ADD_ON_LOADED)
 end
 
 EVENT_MANAGER:RegisterForEvent(EsoKR.name, EVENT_ADD_ON_LOADED, onAddonLoaded)
