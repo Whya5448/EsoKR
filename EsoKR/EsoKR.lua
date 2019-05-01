@@ -1,11 +1,13 @@
-local EsoKR = EsoKR or {}
+EsoKR = EsoKR or {}
 EsoKR.name = "EsoKR"
-EsoKR.Flags = { "en", "kr", "kb", "tr" }
 EsoKR.firstInit = true
 EsoKR.chat = { changed = true, privCursorPos = 0, editing = false }
-EsoKR.version = "0.9.0"
 
-function setLanguage(lang)
+local version = "0.9.0"
+local flags = { "kr", "kb", "tr", "en", "jp" }
+local isNeedToChangeAdditionalFontTable = { "kr", "kb", "tr" }
+
+local function setLanguage(lang)
     zo_callLater(function()
         SetCVar("language.2", lang)
         EsoKR.savedVars.lang = lang
@@ -13,12 +15,17 @@ function setLanguage(lang)
     end, 500)
 end
 
-function getLanguage()
-    return GetCVar("language.2")
+local function getLanguage() return GetCVar("language.2") end
+
+function EsoKR:getFontPath()
+    for _, x in pairs(isNeedToChangeAdditionalFontTable) do
+        if getLanguage() == x then return "EsoKR/Fonts/" end
+    end
+    return "EsoUI/Common/Fonts/"
 end
 
 function EsoKR:getString(id)
-    return EsoKR:con2CNKR(GetString(id))
+    return self:con2CNKR(GetString(id))
 end
 
 local function chsize(char)
@@ -131,7 +138,7 @@ local function RefreshUI()
     local flagControl
     local count = 0
     local flagTexture
-    for _, flagCode in pairs(EsoKR.Flags) do
+    for _, flagCode in pairs(flags) do
         flagTexture = "EsoKR/flags/"..flagCode..".dds"
         flagControl = GetControl("EsoKR_FlagControl_"..tostring(flagCode))
         if flagControl == nil then
@@ -152,164 +159,76 @@ local function RefreshUI()
     EsoKRUI:SetMouseEnabled(true)
 end
 
-local function init(eventCode, addOnName)
-    if (addOnName):find("^ZO_") then return end
+local function fontChangeWhenInit()
+    local path = EsoKR:getFontPath()
+    local pair = {"ZO_TOOLTIP_STYLES", "ZO_CRAFTING_TOOLTIP_STYLES", "ZO_GAMEPAD_DYEING_TOOLTIP_STYLES"}
+    local function f(x) return path..x end
 
-    local defaultVars = { lang = "kr" }
-    EsoKR.savedVars = ZO_SavedVars:NewAccountWide("EsoKR_Variables", 1, nil, defaultVars)
-
-    for _, flagCode in pairs(EsoKR.Flags) do
-        ZO_CreateStringId("SI_BINDING_NAME_"..string.upper(flagCode), string.upper(flagCode))
+    for _, v in pairs(pair) do
+        for k, fnt in pairs(fontFaces[v]) do _G[v][k]["fontFace"] = f(fnt) end
     end
 
-    ZO_TOOLTIP_STYLES["tooltip"]["fontFace"] = "EsoKR/fonts/ftn57.otf"
-    ZO_TOOLTIP_STYLES["bodySection"]["fontFace"] = "EsoKR/fonts/ftn47.otf"
-    ZO_TOOLTIP_STYLES["bodyHeader"]["fontFace"] = "EsoKR/fonts/ftn57.otf"
-    ZO_TOOLTIP_STYLES["itemTagsSection"]["fontFace"] = "EsoKR/fonts/ftn47.otf"
-    ZO_TOOLTIP_STYLES["itemTradeBoPSection"]["fontFace"] = "EsoKR/fonts/ftn47.otf"
-    ZO_TOOLTIP_STYLES["attributeBody"]["fontFace"] = "EsoKR/fonts/ftn47.otf"
-    ZO_TOOLTIP_STYLES["bagCountSection"]["fontFace"] = "EsoKR/fonts/ftn47.otf"
-    ZO_TOOLTIP_STYLES["stableGamepadTooltip"]["fontFace"] = "EsoKR/fonts/ftn57.otf"
-    ZO_TOOLTIP_STYLES["abilityHeaderSection"]["fontFace"] = "EsoKR/fonts/ftn57.otf"
-    ZO_TOOLTIP_STYLES["worldMapTooltip"]["fontFace"] = "EsoKR/fonts/ftn57.otf"
-    ZO_TOOLTIP_STYLES["mapTitle"]["fontFace"] = "EsoKR/fonts/ftn87.otf"
-    ZO_TOOLTIP_STYLES["mapQuestTitle"]["fontFace"] = "EsoKR/fonts/ftn87.otf"
-    ZO_TOOLTIP_STYLES["mapLocationTooltipContentHeader"]["fontFace"] = "EsoKR/fonts/ftn57.otf"
-    ZO_TOOLTIP_STYLES["mapLocationTooltipWayshrineHeader"]["fontFace"] = "EsoKR/fonts/ftn87.otf"
-    ZO_TOOLTIP_STYLES["mapKeepUnderAttack"]["fontFace"] = "EsoKR/fonts/ftn87.otf"
-    ZO_TOOLTIP_STYLES["cadwellObjectiveTitle"]["fontFace"] = "EsoKR/fonts/ftn87.otf"
-    ZO_TOOLTIP_STYLES["lootTooltip"]["fontFace"] = "EsoKR/fonts/ftn57.otf"
-    ZO_TOOLTIP_STYLES["socialTitle"]["fontFace"] = "EsoKR/fonts/ftn47.otf"
-    ZO_TOOLTIP_STYLES["collectionsInfoSection"]["fontFace"] = "EsoKR/fonts/ftn47.otf"
-    ZO_TOOLTIP_STYLES["instantUnlockIneligibilitySection"]["fontFace"] = "EsoKR/fonts/ftn47.otf"
-    ZO_TOOLTIP_STYLES["voiceChatBodyHeader"]["fontFace"] = "EsoKR/fonts/ftn57.otf"
-    ZO_TOOLTIP_STYLES["groupDescription"]["fontFace"] = "EsoKR/fonts/ftn47.otf"
-    ZO_TOOLTIP_STYLES["attributeTitleSection"]["fontFace"] = "EsoKR/fonts/ftn87.otf"
-    ZO_TOOLTIP_STYLES["itemComparisonStatValuePairValue"]["fontFace"] = "EsoKR/fonts/ftn47.otf"
-    ZO_TOOLTIP_STYLES["defaultAccessTopSection"]["fontFace"] = "EsoKR/fonts/ftn47.otf"
-    ZO_TOOLTIP_STYLES["defaultAccessBody"]["fontFace"] = "EsoKR/fonts/ftn47.otf"
-    ZO_TOOLTIP_STYLES["currencyLocationTitle"]["fontFace"] = "EsoKR/fonts/ftn87.otf"
-    ZO_TOOLTIP_STYLES["currencyStatValuePairStat"]["fontFace"] = "EsoKR/fonts/ftn47.otf"
-    ZO_TOOLTIP_STYLES["currencyStatValuePairValue"]["fontFace"] = "EsoKR/fonts/ftn47.otf"
-    ZO_CRAFTING_TOOLTIP_STYLES["tooltip"]["fontFace"] = "EsoKR/fonts/ftn57.otf"
-    ZO_CRAFTING_TOOLTIP_STYLES["bodySection"]["fontFace"] = "EsoKR/fonts/ftn47.otf"
-    ZO_CRAFTING_TOOLTIP_STYLES["bodyHeader"]["fontFace"] = "EsoKR/fonts/ftn57.otf"
-    ZO_CRAFTING_TOOLTIP_STYLES["itemTagsSection"]["fontFace"] = "EsoKR/fonts/ftn47.otf"
-    ZO_CRAFTING_TOOLTIP_STYLES["itemTradeBoPSection"]["fontFace"] = "EsoKR/fonts/ftn47.otf"
-    ZO_CRAFTING_TOOLTIP_STYLES["attributeBody"]["fontFace"] = "EsoKR/fonts/ftn47.otf"
-    ZO_CRAFTING_TOOLTIP_STYLES["bagCountSection"]["fontFace"] = "EsoKR/fonts/ftn47.otf"
-    ZO_CRAFTING_TOOLTIP_STYLES["stableGamepadTooltip"]["fontFace"] = "EsoKR/fonts/ftn57.otf"
-    ZO_CRAFTING_TOOLTIP_STYLES["abilityHeaderSection"]["fontFace"] = "EsoKR/fonts/ftn57.otf"
-    ZO_CRAFTING_TOOLTIP_STYLES["worldMapTooltip"]["fontFace"] = "EsoKR/fonts/ftn57.otf"
-    ZO_CRAFTING_TOOLTIP_STYLES["mapTitle"]["fontFace"] = "EsoKR/fonts/ftn87.otf"
-    ZO_CRAFTING_TOOLTIP_STYLES["mapQuestTitle"]["fontFace"] = "EsoKR/fonts/ftn87.otf"
-    ZO_CRAFTING_TOOLTIP_STYLES["mapLocationTooltipContentHeader"]["fontFace"] = "EsoKR/fonts/ftn57.otf"
-    ZO_CRAFTING_TOOLTIP_STYLES["mapLocationTooltipWayshrineHeader"]["fontFace"] = "EsoKR/fonts/ftn87.otf"
-    ZO_CRAFTING_TOOLTIP_STYLES["mapKeepUnderAttack"]["fontFace"] = "EsoKR/fonts/ftn87.otf"
-    ZO_CRAFTING_TOOLTIP_STYLES["cadwellObjectiveTitle"]["fontFace"] = "EsoKR/fonts/ftn87.otf"
-    ZO_CRAFTING_TOOLTIP_STYLES["lootTooltip"]["fontFace"] = "EsoKR/fonts/ftn57.otf"
-    ZO_CRAFTING_TOOLTIP_STYLES["socialTitle"]["fontFace"] = "EsoKR/fonts/ftn47.otf"
-    ZO_CRAFTING_TOOLTIP_STYLES["collectionsInfoSection"]["fontFace"] = "EsoKR/fonts/ftn47.otf"
-    ZO_CRAFTING_TOOLTIP_STYLES["instantUnlockIneligibilitySection"]["fontFace"] = "EsoKR/fonts/ftn47.otf"
-    ZO_CRAFTING_TOOLTIP_STYLES["voiceChatBodyHeader"]["fontFace"] = "EsoKR/fonts/ftn57.otf"
-    ZO_CRAFTING_TOOLTIP_STYLES["groupDescription"]["fontFace"] = "EsoKR/fonts/ftn47.otf"
-    ZO_CRAFTING_TOOLTIP_STYLES["attributeTitleSection"]["fontFace"] = "EsoKR/fonts/ftn87.otf"
-    ZO_CRAFTING_TOOLTIP_STYLES["itemComparisonStatValuePairValue"]["fontFace"] = "EsoKR/fonts/ftn47.otf"
-    ZO_CRAFTING_TOOLTIP_STYLES["defaultAccessTopSection"]["fontFace"] = "EsoKR/fonts/ftn47.otf"
-    ZO_CRAFTING_TOOLTIP_STYLES["defaultAccessBody"]["fontFace"] = "EsoKR/fonts/ftn47.otf"
-    ZO_CRAFTING_TOOLTIP_STYLES["currencyLocationTitle"]["fontFace"] = "EsoKR/fonts/ftn87.otf"
-    ZO_CRAFTING_TOOLTIP_STYLES["currencyStatValuePairStat"]["fontFace"] = "EsoKR/fonts/ftn47.otf"
-    ZO_CRAFTING_TOOLTIP_STYLES["currencyStatValuePairValue"]["fontFace"] = "EsoKR/fonts/ftn47.otf"
-    ZO_GAMEPAD_DYEING_TOOLTIP_STYLES["tooltip"]["fontFace"] = "EsoKR/fonts/ftn57.otf"
-    ZO_GAMEPAD_DYEING_TOOLTIP_STYLES["body"]["fontFace"] = "EsoKR/fonts/ftn57.otf"
-
-    SetSCTKeyboardFont("EsoKR/fonts/univers67.otf|29|soft-shadow-thick")
-    SetSCTGamepadFont("EsoKR/fonts/univers67.otf|35|soft-shadow-thick")
-    SetNameplateKeyboardFont("EsoKR/fonts/univers67.otf", 4)
-    SetNameplateGamepadFont("EsoKR/fonts/univers67.otf", 4)
+    SetSCTKeyboardFont(f(fontFaces.UNI67).."|29|soft-shadow-thick")
+    SetSCTGamepadFont(f(fontFaces.UNI67) .."|35|soft-shadow-thick")
+    SetNameplateKeyboardFont(f(fontFaces.UNI67), 4)
+    SetNameplateGamepadFont(f(fontFaces.UNI67), 4)
 
     if LibStub then
         local LMP = LibStub("LibMediaProvider-1.0", true)
         if LMP then
-            LMP.MediaTable.font["Univers 67"] = nil 
-            LMP.MediaTable.font["Univers 57"] = nil
-            LMP.MediaTable.font["Skyrim Handwritten"] = nil
-            LMP.MediaTable.font["ProseAntique"] = nil
-            LMP.MediaTable.font["Trajan Pro"] = nil
-            LMP.MediaTable.font["Futura Condensed"] = nil
-            LMP.MediaTable.font["Futura Condensed Bold"] = nil
-            LMP.MediaTable.font["Futura Condensed Light"] = nil
-            LMP:Register("font", "Univers 67", "EsoKR/fonts/univers67.otf")
-            LMP:Register("font", "Univers 57", "EsoKR/fonts/univers57.otf")
-            LMP:Register("font", "Skyrim Handwritten", "EsoKR/fonts/handwritten_bold.otf")
-            LMP:Register("font", "ProseAntique", "EsoKR/fonts/proseantiquepsmt.otf")
-            LMP:Register("font", "Trajan Pro", "EsoKR/fonts/trajanpro-regular.otf")
-            LMP:Register("font", "Futura Condensed", "EsoKR/fonts/ftn57.otf")
-            LMP:Register("font", "Futura Condensed Bold", "EsoKR/fonts/ftn87.otf")
-            LMP:Register("font", "Futura Condensed Light", "EsoKR/fonts/ftn47.otf")
+            for k, v in pairs(fontFaces.fonts) do
+                LMP.MediaTable.font[k] = nil
+                LMP:Register("font", k, f(v))
+            end
             LMP:SetDefault("font", "Univers 57")
         end
     end
 
-	if LWF3 then
-		LWF3.data.Fonts = {
-            ["Arial Narrow"] = "EsoKR/fonts/univers57.otf",
-            ["Consolas"] = "EsoKR/fonts/univers57.otf",
-            ["ESO Cartographer"] = "EsoKR/fonts/univers57.otf",
-            ["Fontin Bold"] = "EsoKR/fonts/univers57.otf",
-            ["Fontin Italic"] = "EsoKR/fonts/univers57.otf",
-            ["Fontin Regular"] = "EsoKR/fonts/univers57.otf",
-            ["Fontin SmallCaps"] = "EsoKR/fonts/univers57.otf",
-            ["Futura Condensed"]= "EsoKR/fonts/univers57.otf",
-            ["Futura Light"] = "EsoKR/fonts/ftn47.otf",
-            ["ProseAntique"] = "EsoKR/fonts/proseantiquepsmt.otf",
-            ["Skyrim Handwritten"]= "EsoKR/fonts/handwritten_bold.otf",
-            ["Trajan Pro"] = "EsoKR/fonts/trajanpro-regular.otf",
-            ["Univers 55"] = "EsoKR/fonts/univers57.otf",
-            ["Univers 57"] = "EsoKR/fonts/univers57.otf",
-            ["Univers 67"] = "EsoKR/fonts/univers67.otf",
-		}
-	end
-	
-	if LWF4 then
-		LWF4.data.Fonts = {
-            ["Arial Narrow"] = "EsoKR/fonts/univers57.otf",
-            ["Consolas"] = "EsoKR/fonts/univers57.otf",
-            ["ESO Cartographer"] = "EsoKR/fonts/univers57.otf",
-            ["Fontin Bold"] = "EsoKR/fonts/univers57.otf",
-            ["Fontin Italic"] = "EsoKR/fonts/univers57.otf",
-            ["Fontin Regular"] = "EsoKR/fonts/univers57.otf",
-            ["Fontin SmallCaps"] = "EsoKR/fonts/univers57.otf",
-            ["Futura Condensed"]= "EsoKR/fonts/ftn57.otf",
-            ["Futura Light"] = "EsoKR/fonts/ftn47.otf",
-            ["ProseAntique"] = "EsoKR/fonts/proseantiquepsmt.otf",
-            ["Skyrim Handwritten"]= "EsoKR/fonts/handwritten_bold.otf",
-            ["Trajan Pro"] = "EsoKR/fonts/trajanpro-regular.otf",
-            ["Univers 55"] = "EsoKR/fonts/univers57.otf",
-            ["Univers 57"] = "EsoKR/fonts/univers57.otf",
-            ["Univers 67"] = "EsoKR/fonts/univers67.otf",
-		}
-	end
+    local uni57 = f(fontFaces.UNI57)
+    if LWF3 then
+        LWF3.data.Fonts = {
+            ["Arial Narrow"] = uni57,
+            ["Consolas"] = uni57,
+            ["ESO Cartographer"] = uni57,
+            ["Fontin Bold"] = uni57,
+            ["Fontin Italic"] = uni57,
+            ["Fontin Regular"] = uni57,
+            ["Fontin SmallCaps"] = uni57,
+            ["Futura Condensed"]= uni57,
+            ["Futura Light"] = path..fontFaces.FTN47,
+        }
+        for k, v in pairs(fontFaces.fonts) do LWF3.data.Fonts[k] = f(v) end
+    end
+
+    if LWF4 then
+        LWF4.data.Fonts = {
+            ["Arial Narrow"] = uni57,
+            ["Consolas"] = uni57,
+            ["ESO Cartographer"] = uni57,
+            ["Fontin Bold"] = uni57,
+            ["Fontin Italic"] = uni57,
+            ["Fontin Regular"] = uni57,
+            ["Fontin SmallCaps"] = uni57,
+            ["Futura Condensed"]= uni57,
+            ["Futura Light"] = path..fontFaces.FTN47,
+        }
+        for k, v in pairs(fontFaces.fonts) do LWF4.data.Fonts[k] = f(v) end
+    end
 
     function ZO_TooltipStyledObject:GetFontString(...)
         local fontFace = self:GetProperty("fontFace", ...)
         local fontSize = self:GetProperty("fontSize", ...)
-        local fontStyle = self:GetProperty("fontStyle", ...)
 
-        if fontFace == "$(GAMEPAD_LIGHT_FONT)" then
-            fontFace = "EsoKR/fonts/ftn47.otf"
-        end
-        if fontFace == "$(GAMEPAD_MEDIUM_FONT)" then
-            fontFace = "EsoKR/fonts/ftn57.otf"
-        end
-        if fontFace == "$(GAMEPAD_BOLD_FONT)" then
-            fontFace = "EsoKR/fonts/ftn87.otf"
-        end
+        if fontFace == "$(GAMEPAD_LIGHT_FONT)" then fontFace = f(fontFaces.FTN47) end
+        if fontFace == "$(GAMEPAD_MEDIUM_FONT)" then fontFace = f(fontFaces.FTN57) end
+        if fontFace == "$(GAMEPAD_BOLD_FONT)" then fontFace = f(fontFaces.FTN87) end
 
         if(fontFace and fontSize) then
             if type(fontSize) == "number" then
                 fontSize = tostring(fontSize)
             end
+
+            local fontStyle = self:GetProperty("fontStyle", ...)
             if(fontStyle) then
                 return string.format("%s|%s|%s", fontFace, fontSize, fontStyle)
             else
@@ -319,7 +238,26 @@ local function init(eventCode, addOnName)
             return "ZoFontGame"
         end
     end
+end
 
+local function fontChangeWhenPlayerActivaited()
+    local path = EsoKR:getFontPath()
+    local function f(x) return path..x end
+    SetSCTKeyboardFont(f(fontFaces.UNI67).."|29|soft-shadow-thick")
+    SetSCTGamepadFont(f(fontFaces.UNI67) .."|35|soft-shadow-thick")
+    SetNameplateKeyboardFont(f(fontFaces.UNI67), 4)
+    SetNameplateGamepadFont(f(fontFaces.UNI67), 4)
+
+end
+
+local function init(eventCode, addOnName)
+    if (addOnName):find("^ZO_") then return end
+
+    for _, flagCode in pairs(flags) do
+        ZO_CreateStringId("SI_BINDING_NAME_"..string.upper(flagCode), string.upper(flagCode))
+    end
+
+    fontChangeWhenInit()
     RefreshUI()
 
     function ZO_GameMenu_OnShow(control)
@@ -343,28 +281,25 @@ local function init(eventCode, addOnName)
 end
 
 function EsoKR:Convert(edit)
-    if EsoKR.chat.editing then return end
+    if self.chat.editing then return end
     local cursorPos = edit:GetCursorPosition()
-    if cursorPos ~= EsoKR.chat.privCursorPos and cursorPos ~= 0 then
-        EsoKR.chat.editing = true
-        local text = EsoKR:con2CNKR(edit:GetText())
+    if cursorPos ~= self.chat.privCursorPos and cursorPos ~= 0 then
+        self.chat.editing = true
+        local text = self:con2CNKR(edit:GetText())
         edit:SetText(text)
         if(cursorPos < utfstrlen(text)) then edit:SetCursorPosition(cursorPos) end
-        EsoKR.chat.editing = false
+        self.chat.editing = false
     end
-    EsoKR.chat.privCursorPos = cursorPos
+    self.chat.privCursorPos = cursorPos
 end
 
-local function loadScreen(event)
-    SetSCTKeyboardFont("EsoKR/fonts/univers67.otf|29|soft-shadow-thick")
-    SetSCTGamepadFont("EsoKR/fonts/univers67.otf|35|soft-shadow-thick")
-    SetNameplateKeyboardFont("EsoKR/fonts/univers67.otf", 4)
-    SetNameplateGamepadFont("EsoKR/fonts/univers67.otf", 4)
-    
+local function loadscreen(event)
+    fontChangeWhenPlayerActivaited()
+
     if EsoKR.firstInit then
         EsoKR.firstInit = false
-        if getLanguage() ~= "kr" and EsoKR.savedVars.lang == "kr" then
-            setLanguage("kr")
+        for _, v in pairs(isNeedToChangeAdditionalFontTable) do
+            if getLanguage() ~= v and EsoKR.savedVars.lang == v then setLanguage(v) end
         end
     end
 end
@@ -375,40 +310,38 @@ function EsoKR:closeMessageBox()
 end
 
 function EsoKR:showMessageBox(title, msg, btnText, callback)
-    local confirmDialog =
-    {
+    local confirmDialog = {
         title = { text = title },
         mainText = { text = msg },
-        buttons =
-        {
-            {
-                text = btnText,
-                callback = callback
-            }
-        }
+        buttons = { { text = btnText, callback = callback } }
     }
 
     ZO_Dialogs_RegisterCustomDialog("EsoKR:MessageBox", confirmDialog)
-    EsoKR:closeMessageBox()
+    self:closeMessageBox()
     ZO_Dialogs_ShowDialog("EsoKR:MessageBox")
 end
 
-function EsoKR:newInit()
-    if EsoKR.savedVars.addonVer ~= EsoKR.version then
-        EsoKR:showMessageBox(EsoKR:getString(EsoKR_NOTICE_TITLE),EsoKR:getString(EsoKR_NOTICE_BODY),SI_DIALOG_CONFIRM)
-        EsoKR.savedVars.addonVer = EsoKR.version
-    end
-end
+function EsoKR:newInit(eventCode, addOnName)
+    if(addOnName ~= self.name) then return end
+    self.savedVars = ZO_SavedVars:NewAccountWide("EsoKR_Variables", 1, nil, {lang="kr"})
 
-local function onAddonLoaded(eventCode, addOnName)
-    init(eventCode, addOnName)
-    if(addOnName ~= EsoKR.name) then
-        return
+    if not EsoKR.firstInit then
+        if self.savedVars.addonVer ~= version then
+            self:showMessageBox(self:getString(EsoKR_NOTICE_TITLE),self:getString(EsoKR_NOTICE_BODY),SI_DIALOG_CONFIRM)
+            self.savedVars.addonVer = version
+        end
     end
-
-    EsoKR:newInit()
+    if self.savedVars.ignorePatcher == nil or self.savedVars.ignorePatcher ~= true then
+        SetCVar("IgnorePatcherLanguageSetting", 1)
+        if GetCVar("IgnorePatcherLanguageSetting") == "1" then self.savedVars.ignorePatcher = true end
+    end
     --EVENT_MANAGER:UnregisterForEvent(EsoKR.name, EVENT_ADD_ON_LOADED)
 end
 
+local function onAddonLoaded(...)
+    init(...)
+    EsoKR:newInit(...)
+end
+
 EVENT_MANAGER:RegisterForEvent(EsoKR.name, EVENT_ADD_ON_LOADED, onAddonLoaded)
-EVENT_MANAGER:RegisterForEvent("EsoKR_LoadScreen", EVENT_PLAYER_ACTIVATED, loadScreen)
+EVENT_MANAGER:RegisterForEvent("EsoKR_LoadScreen", EVENT_PLAYER_ACTIVATED, loadscreen)

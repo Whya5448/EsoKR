@@ -16,4 +16,5 @@
 
 EsoKR.lua
 EsoKR.xml
+fontFace.lua
 strings.lua
