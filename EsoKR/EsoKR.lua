@@ -2,8 +2,8 @@ EsoKR = EsoKR or {}
 EsoKR.name = "EsoKR"
 EsoKR.firstInit = true
 EsoKR.chat = { changed = true, privCursorPos = 0, editing = false }
+EsoKR.version = "0.9.1"
 
-local version = "0.9.0"
 local flags = { "kr", "kb", "tr", "en", "jp" }
 local isNeedToChangeAdditionalFontTable = { "kr", "kb", "tr" }
 
@@ -28,6 +28,7 @@ function EsoKR:getString(id)
     return self:con2CNKR(GetString(id))
 end
 
+--[[
 local function chsize(char)
     if not char then return 0
     elseif char > 240 then return 4
@@ -54,6 +55,7 @@ local function utf8sub(str, startChar, numChars)
     end
     return str:sub(startIndex, currentIndex - 1)
 end
+]]
 
 function EsoKR:con2CNKR(texts)
     local temp = ""
@@ -78,21 +80,14 @@ function EsoKR:con2CNKR(texts)
             scanleft = scanleft - 1
             if scanleft == 0 then
                 temp = tonumber(temp, 16)
-                if temp >= 0xE18480 and temp <= 0xE187BF then
-                    temp = temp + 0x43400
-                elseif temp > 0xe384b0 and temp <= 0xe384bf then
-                    temp = temp + 0x237d0
-                elseif temp > 0xe38580 and temp <= 0xe3868f then
-                    temp = temp + 0x23710
+                if temp >= 0xE18480 and temp <= 0xE187BF then temp = temp + 0x43400
+                elseif temp > 0xe384b0 and temp <= 0xe384bf then temp = temp + 0x237d0
+                elseif temp > 0xe38580 and temp <= 0xe3868f then temp = temp + 0x23710
                 elseif temp >= 0xeab080 and temp <= 0xed9eac then
-                    if temp >= 0xeab880 and temp <= 0xeabfbf then
-                        temp = temp - 0x33800
-                    elseif temp >= 0xebb880 and temp <= 0xebbfbf then
-                        temp = temp - 0x33800
-                    elseif temp >= 0xECB880 and temp <= 0xECBFBF then
-                        temp = temp - 0x33800
-                    else
-                        temp = temp - 0x3f800
+                    if temp >= 0xeab880 and temp <= 0xeabfbf then temp = temp - 0x33800
+                        elseif temp >= 0xebb880 and temp <= 0xebbfbf then temp = temp - 0x33800
+                        elseif temp >= 0xECB880 and temp <= 0xECBFBF then temp = temp - 0x33800
+                        else temp = temp - 0x3f800
                     end
                 end
                 temp = string.format('%02X', temp)
@@ -302,6 +297,8 @@ local function loadscreen(event)
             if getLanguage() ~= v and EsoKR.savedVars.lang == v then setLanguage(v) end
         end
     end
+
+    zo_callLater(function() CALLBACK_MANAGER:FireCallbacks("loadscreen") end, 1000)
 end
 
 
@@ -325,17 +322,18 @@ function EsoKR:newInit(eventCode, addOnName)
     if(addOnName ~= self.name) then return end
     self.savedVars = ZO_SavedVars:NewAccountWide("EsoKR_Variables", 1, nil, {lang="kr"})
 
-    if not EsoKR.firstInit then
-        if self.savedVars.addonVer ~= version then
-            self:showMessageBox(self:getString(EsoKR_NOTICE_TITLE),self:getString(EsoKR_NOTICE_BODY),SI_DIALOG_CONFIRM)
-            self.savedVars.addonVer = version
-        end
-    end
-    if self.savedVars.ignorePatcher == nil or self.savedVars.ignorePatcher ~= true then
+    if self.savedVars["ignorePatcher"] ~= true then
         SetCVar("IgnorePatcherLanguageSetting", 1)
-        if GetCVar("IgnorePatcherLanguageSetting") == "1" then self.savedVars.ignorePatcher = true end
+        if GetCVar("IgnorePatcherLanguageSetting") == "1" then self.savedVars["ignorePatcher"] = true end
     end
     --EVENT_MANAGER:UnregisterForEvent(EsoKR.name, EVENT_ADD_ON_LOADED)
+end
+
+local function LoadscreenLoaded()
+    if EsoKR.savedVars["addonVer"] ~= EsoKR.version then
+        EsoKR:showMessageBox(EsoKR:getString(EsoKR_NOTICE_TITLE),EsoKR:getString(EsoKR_NOTICE_BODY),SI_DIALOG_CONFIRM)
+        EsoKR.savedVars["addonVer"] = EsoKR.version
+    end
 end
 
 local function onAddonLoaded(...)
@@ -345,3 +343,4 @@ end
 
 EVENT_MANAGER:RegisterForEvent(EsoKR.name, EVENT_ADD_ON_LOADED, onAddonLoaded)
 EVENT_MANAGER:RegisterForEvent("EsoKR_LoadScreen", EVENT_PLAYER_ACTIVATED, loadscreen)
+CALLBACK_MANAGER:RegisterCallback("loadscreen", LoadscreenLoaded)
