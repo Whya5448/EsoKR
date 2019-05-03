@@ -1,7 +1,7 @@
 local EsoKRLite = EsoKRLite or {}
 EsoKRLite.name = "EsoKRLite"
 EsoKRLite.chat = { privCursorPos = 0, editing = false }
-EsoKRLite.version = "0.1.0"
+EsoKRLite.version = "0.1.2"
 
 local function chsize(char)
     if not char then return 0
