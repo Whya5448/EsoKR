@@ -4,10 +4,18 @@ EsoKR.firstInit = true
 EsoKR.chat = { changed = true, privCursorPos = 0, editing = false }
 EsoKR.version = "0.9.4"
 
-local flags = { "kr", "kb", "tr", "en", "jp" }
+local flags = { "kr", "kb", "tr", "en", "ja" }
 local isNeedToChangeAdditionalFontTable = { "kr", "kb", "tr" }
 
-local function setLanguage(lang)
+function EsoKR:test()
+    for _, v in pairs(CHAT_SYSTEM.control.container.tabPool.m_Active) do
+        d(v:GetNamedChild("Text"):GetText())
+        d(v.container.currentBuffer) --SetFont
+        v.container.currentBuffer:AddMessage("Hello World!", 255, 255, 255, CHAT_CATEGORY_WHISPER_INCOMING)
+    end
+end
+
+function EsoKR:setLanguage(lang)
     zo_callLater(function()
         SetCVar("language.2", lang)
         EsoKR.savedVars.lang = lang
@@ -142,7 +150,7 @@ local function RefreshUI()
             if getLanguage() ~= flagCode then
                 flagControl:SetAlpha(0.3)
                 if flagControl:GetHandler("OnMouseDown") == nil then
-                    flagControl:SetHandler("OnMouseDown", function() setLanguage(flagCode) end)
+                    flagControl:SetHandler("OnMouseDown", function() EsoKR:setLanguage(flagCode) end)
                 end
             end
         end
@@ -294,7 +302,7 @@ local function loadscreen(event)
     if EsoKR.firstInit then
         EsoKR.firstInit = false
         for _, v in pairs(isNeedToChangeAdditionalFontTable) do
-            if getLanguage() ~= v and EsoKR.savedVars.lang == v then setLanguage(v) end
+            if getLanguage() ~= v and EsoKR.savedVars.lang == v then EsoKR:setLanguage(v) end
         end
     end
 
