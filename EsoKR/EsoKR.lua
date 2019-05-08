@@ -2,7 +2,7 @@ EsoKR = EsoKR or {}
 EsoKR.name = "EsoKR"
 EsoKR.firstInit = true
 EsoKR.chat = { changed = true, privCursorPos = 0, editing = false }
-EsoKR.version = "0.9.4"
+EsoKR.version = "0.9.5"
 
 local flags = { "kr", "kb", "tr", "en", "ja" }
 local isNeedToChangeAdditionalFontTable = { "kr", "kb", "tr", "en" }
