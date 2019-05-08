@@ -5,7 +5,7 @@ EsoKR.chat = { changed = true, privCursorPos = 0, editing = false }
 EsoKR.version = "0.9.4"
 
 local flags = { "kr", "kb", "tr", "en", "ja" }
-local isNeedToChangeAdditionalFontTable = { "kr", "kb", "tr" }
+local isNeedToChangeAdditionalFontTable = { "kr", "kb", "tr", "en" }
 
 function EsoKR:test()
     for _, v in pairs(CHAT_SYSTEM.control.container.tabPool.m_Active) do
