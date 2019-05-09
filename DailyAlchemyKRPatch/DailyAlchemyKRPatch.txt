@@ -1,0 +1,8 @@
+## Title: KR Patch for |c3CB371Daily Alchemy|r
+## Description: KR Patch for |c3CB371Daily Alchemy|r
+## APIVersion: 100026
+## Author: @Whya5448
+## Version: 0.0.1
+## DependsOn: DailyAlchemy EsoKR
+
+$(language).lua

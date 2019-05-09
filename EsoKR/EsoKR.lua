@@ -1,11 +1,17 @@
-EsoKR = EsoKR or {}
-EsoKR.name = "EsoKR"
-EsoKR.firstInit = true
-EsoKR.chat = { changed = true, privCursorPos = 0, editing = false }
-EsoKR.version = "0.9.5"
+EsoKR = EsoKR or {
+    name = "EsoKR",
+    firstInit = true,
+    chat = { changed = true, privCursorPos = 0, editing = false },
+    version = "0.9.5",
+    langVer = {
+        ["stable"] = "kr",
+        ["beta"] = "kb",
+        ["index"] = "tr"
+    }
+}
 
-local flags = { "kr", "kb", "tr", "en", "ja" }
-local isNeedToChangeAdditionalFontTable = { "kr", "kb", "tr", "en" }
+local flags = { EsoKR.langVer.stable, EsoKR.langVer.beta, EsoKR.langVer.index, "en", "ja" }
+local isNeedToChangeAdditionalFontTable = { EsoKR.langVer.stable, EsoKR.langVer.beta, EsoKR.langVer.index, "en" }
 
 function EsoKR:test()
     for _, v in pairs(CHAT_SYSTEM.control.container.tabPool.m_Active) do
@@ -33,7 +39,7 @@ function EsoKR:getFontPath()
 end
 
 function EsoKR:getString(id)
-    return self:con2CNKR(GetString(id))
+    return self:con2CNKR(GetString(id), true)
 end
 
 --[[
@@ -65,7 +71,7 @@ local function utf8sub(str, startChar, numChars)
 end
 ]]
 
-function EsoKR:con2CNKR(texts)
+function EsoKR:con2CNKR(texts, encode)
     local temp = ""
     local scanleft = 0
     local result = ""
@@ -89,14 +95,15 @@ function EsoKR:con2CNKR(texts)
             if scanleft == 0 then
                 temp = tonumber(temp, 16)
                 if temp >= 0xE18480 and temp <= 0xE187BF then temp = temp + 0x43400
-                elseif temp > 0xe384b0 and temp <= 0xe384bf then temp = temp + 0x237d0
-                elseif temp > 0xe38580 and temp <= 0xe3868f then temp = temp + 0x23710
-                elseif temp >= 0xeab080 and temp <= 0xed9eac then
-                    if temp >= 0xeab880 and temp <= 0xeabfbf then temp = temp - 0x33800
-                        elseif temp >= 0xebb880 and temp <= 0xebbfbf then temp = temp - 0x33800
+                elseif temp > 0xE384B0 and temp <= 0xE384BF then temp = temp + 0x237D0
+                elseif temp > 0xE38580 and temp <= 0xE3868F then temp = temp + 0x23710
+                elseif temp >= 0xEAB080 and temp <= 0xED9EAC then
+                    if temp >= 0xEAB880 and temp <= 0xEABFBF then temp = temp - 0x33800
+                        elseif temp >= 0xEBB880 and temp <= 0xEBBFBF then temp = temp - 0x33800
                         elseif temp >= 0xECB880 and temp <= 0xECBFBF then temp = temp - 0x33800
-                        else temp = temp - 0x3f800
+                        else temp = temp - 0x3F800
                     end
+                elseif not encode and temp >= 0xE6B880 and temp <= 0xE9A6A3 then temp = temp + 0x3F800
                 end
                 temp = string.format('%02X', temp)
                 r = (temp:gsub('..', function (cc) return string.char(tonumber(cc, 16)) end))
@@ -105,7 +112,7 @@ function EsoKR:con2CNKR(texts)
                 num = num + 1
             end
         else
-            if byte > 224 and byte <= 239 then
+            if byte > 0xE0 and byte <= 0xEF then
                 -- 3 bytes
                 scanleft = 2
                 temp = hex
@@ -119,6 +126,8 @@ function EsoKR:con2CNKR(texts)
     end
     return result
 end
+
+function EsoKR:E(text) return self:con2CNKR(text, true) end
 
 local function utfstrlen(str, targetlen)
     local len = #str;
@@ -288,7 +297,7 @@ function EsoKR:Convert(edit)
     local cursorPos = edit:GetCursorPosition()
     if cursorPos ~= self.chat.privCursorPos and cursorPos ~= 0 then
         self.chat.editing = true
-        local text = self:con2CNKR(edit:GetText())
+        local text = self:con2CNKR(edit:GetText(), true)
         edit:SetText(text)
         if(cursorPos < utfstrlen(text)) then edit:SetCursorPosition(cursorPos) end
         self.chat.editing = false
@@ -328,7 +337,7 @@ end
 
 function EsoKR:newInit(eventCode, addOnName)
     if(addOnName ~= self.name) then return end
-    self.savedVars = ZO_SavedVars:NewAccountWide("EsoKR_Variables", 1, nil, {lang="kr"})
+    self.savedVars = ZO_SavedVars:NewAccountWide("EsoKR_Variables", 1, nil, {lang=EsoKR.langVer.stable})
 
     if self.savedVars["ignorePatcher"] ~= true then
         SetCVar("IgnorePatcherLanguageSetting", 1)
