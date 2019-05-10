@@ -5,5 +5,5 @@
 ## Version: 0.0.1
 ## DependsOn: DolgubonsLazyWritCreator EsoKR
 
-$(language).lua
+DolgubonsLazyWritCreatorKRPatch.lua
 ReticleChanges.lua

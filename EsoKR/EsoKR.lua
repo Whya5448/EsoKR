@@ -7,12 +7,14 @@ EsoKR = EsoKR or {
         ["stable"] = "kr",
         ["beta"] = "kb",
         ["index"] = "tr"
-    }
+    },
 }
 
 local flags = { EsoKR.langVer.stable, EsoKR.langVer.beta, EsoKR.langVer.index, "en", "ja" }
+local korean = { EsoKR.langVer.stable, EsoKR.langVer.beta, EsoKR.langVer.index }
 local isNeedToChangeAdditionalFontTable = { EsoKR.langVer.stable, EsoKR.langVer.beta, EsoKR.langVer.index, "en" }
 
+-- 실시간 채팅창 폰트변환
 function EsoKR:test()
     for _, v in pairs(CHAT_SYSTEM.control.container.tabPool.m_Active) do
         d(v:GetNamedChild("Text"):GetText())
@@ -29,11 +31,17 @@ function EsoKR:setLanguage(lang)
     end, 500)
 end
 
-local function getLanguage() return GetCVar("language.2") end
+function EsoKR:getLanguage() return GetCVar("language.2") end
+
+function EsoKR:isKorean()
+    local l = self:getLanguage()
+    for _, v in pairs(korean) do if l==v then return true end end
+    return false
+end
 
 function EsoKR:getFontPath()
     for _, x in pairs(isNeedToChangeAdditionalFontTable) do
-        if getLanguage() == x then return "EsoKR/Fonts/" end
+        if self:getLanguage() == x then return "EsoKR/Fonts/" end
     end
     return "EsoUI/Common/Fonts/"
 end
@@ -128,6 +136,11 @@ function EsoKR:con2CNKR(texts, encode)
 end
 
 function EsoKR:E(text) return self:con2CNKR(text, true) end
+function EsoKR:removeIndex(text) return text:gsub("[%w][%w%d_%-,'()]+[_%-]+%d[_%-]%d+[_%-]?", "") end
+EsoKR.test = {
+    ["DA"] = EsoKR:E("item-type_0_71_한 모금의 Potion_0_30146_매지카 물약"),
+    ["DP"] = EsoKR:E("Food_0_68251_수탉 토마토-사탕무 캐서롤(Capon Tomato-Beet Casserole)"),
+}
 
 local function utfstrlen(str, targetlen)
     local len = #str;
@@ -156,7 +169,7 @@ local function RefreshUI()
         if flagControl == nil then
             flagControl = CreateControlFromVirtual("EsoKR_FlagControl_", EsoKRUI, "EsoKR_FlagControl", tostring(flagCode))
             GetControl("EsoKR_FlagControl_"..flagCode.."Texture"):SetTexture(flagTexture)
-            if getLanguage() ~= flagCode then
+            if EsoKR:getLanguage() ~= flagCode then
                 flagControl:SetAlpha(0.3)
                 if flagControl:GetHandler("OnMouseDown") == nil then
                     flagControl:SetHandler("OnMouseDown", function() EsoKR:setLanguage(flagCode) end)
@@ -311,7 +324,7 @@ local function loadscreen(event)
     if EsoKR.firstInit then
         EsoKR.firstInit = false
         for _, v in pairs(isNeedToChangeAdditionalFontTable) do
-            if getLanguage() ~= v and EsoKR.savedVars.lang == v then EsoKR:setLanguage(v) end
+            if EsoKR:getLanguage() ~= v and EsoKR.savedVars.lang == v then EsoKR:setLanguage(v) end
         end
     end
 
