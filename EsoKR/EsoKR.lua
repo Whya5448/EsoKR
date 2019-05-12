@@ -2,7 +2,7 @@ EsoKR = EsoKR or {
     name = "EsoKR",
     firstInit = true,
     chat = { changed = true, privCursorPos = 0, editing = false },
-    version = "0.9.7",
+    version = "0.9.6",
     langVer = {
         ["stable"] = "kr",
         ["beta"] = "kb",
@@ -40,9 +40,7 @@ function EsoKR:isKorean()
 end
 
 function EsoKR:getFontPath()
-    for _, x in pairs(isNeedToChangeAdditionalFontTable) do
-        if self:getLanguage() == x then return "EsoKR/Fonts/" end
-    end
+    for _, x in pairs(isNeedToChangeAdditionalFontTable) do if self:getLanguage() == x then return "EsoKR/Fonts/" end end
     return "EsoUI/Common/Fonts/"
 end
 
@@ -184,14 +182,13 @@ local function RefreshUI()
     EsoKRUI:SetMouseEnabled(true)
 end
 
-local function fontChangeWhenInit()
+function EsoKR:fontChangeWhenInit()
     local path = EsoKR:getFontPath()
     local pair = {"ZO_TOOLTIP_STYLES", "ZO_CRAFTING_TOOLTIP_STYLES", "ZO_GAMEPAD_DYEING_TOOLTIP_STYLES"}
     local function f(x) return path..x end
+    local fontFaces = EsoKR.fontFaces
 
-    for _, v in pairs(pair) do
-        for k, fnt in pairs(fontFaces[v]) do _G[v][k]["fontFace"] = f(fnt) end
-    end
+    for _, v in pairs(pair) do for k, fnt in pairs(fontFaces[v]) do _G[v][k]["fontFace"] = f(fnt) end end
 
     SetSCTKeyboardFont(f(fontFaces.UNI67).."|29|soft-shadow-thick")
     SetSCTGamepadFont(f(fontFaces.UNI67) .."|35|soft-shadow-thick")
@@ -268,6 +265,8 @@ end
 local function fontChangeWhenPlayerActivaited()
     local path = EsoKR:getFontPath()
     local function f(x) return path..x end
+    local fontFaces = EsoKR.fontFaces
+
     SetSCTKeyboardFont(f(fontFaces.UNI67).."|29|soft-shadow-thick")
     SetSCTGamepadFont(f(fontFaces.UNI67) .."|35|soft-shadow-thick")
     SetNameplateKeyboardFont(f(fontFaces.UNI67), 4)
@@ -282,7 +281,7 @@ local function init(eventCode, addOnName)
         ZO_CreateStringId("SI_BINDING_NAME_"..string.upper(flagCode), string.upper(flagCode))
     end
 
-    fontChangeWhenInit()
+    EsoKR:fontChangeWhenInit()
     RefreshUI()
 
     function ZO_GameMenu_OnShow(control)
