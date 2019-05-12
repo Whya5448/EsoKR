@@ -2,11 +2,11 @@
 ## Description: KR Patch for |cFFFFFFDestinations|r
 ## APIVersion: 100026
 ## Author: @Whya5448
-## Version: 0.0.2
+## Version: 0.0.3
 ## DependsOn: Destinations EsoKR
 
-DestinationsQuests_kr.lua
-DestinationsQuestgivers_kr.lua
-DestinationsCollectibles_kr.lua
-DestinationsSettings_kr.lua
-DestinationsTraders_kr.lua
+DestinationsQuests_$(language).lua
+DestinationsQuestgivers_$(language).lua
+DestinationsCollectibles_en.lua
+DestinationsSettings_en.lua
+DestinationsTraders_en.lua
