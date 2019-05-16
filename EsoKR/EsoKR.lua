@@ -2,7 +2,7 @@ EsoKR = EsoKR or {
     name = "EsoKR",
     firstInit = true,
     chat = { changed = true, privCursorPos = 0, editing = false },
-    version = "0.9.7",
+    version = "0.9.8",
     langVer = {
         ["stable"] = "kr",
         ["beta"] = "kb",
