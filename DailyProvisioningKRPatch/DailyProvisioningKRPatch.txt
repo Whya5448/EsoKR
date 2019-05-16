@@ -2,7 +2,7 @@
 ## Description: KR Patch for |c3CB371Daily Alchemy|r
 ## APIVersion: 100026
 ## Author: @Whya5448
-## Version: 0.0.2
+## Version: 1.0.0
 ## DependsOn: DailyProvisioning EsoKR
 
 DailyProvisioningKRPatch.lua
